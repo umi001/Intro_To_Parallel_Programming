@@ -6,7 +6,7 @@ from 0 to 1.  The value of this integral is pi.
 */
 #include <stdio.h>
 #include <omp.h>
-static long num_steps = 100000000;
+static long num_steps = 1000000000;
 double step;
 const static int NUM_THREADS = 10;
 
@@ -66,6 +66,14 @@ void pi_parallel()
         {
             x = (i - 0.5) * step;
             sum_private = sum_private + 4.0 / (1.0 + x * x);
+            
+            /*
+             // Below commented  line could lead to false sharing. 
+             // Basically different threads try to reload the cache 
+             // line as each threads modifies the array element, and so the cache line becomes dirty.
+            */
+
+           // sum[thread_num] = sum[thread_num] + 4.0 / (1.0 + x * x); 
         }
         sum[thread_num] = sum_private;
     }
